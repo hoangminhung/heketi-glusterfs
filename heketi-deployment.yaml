@@ -1,0 +1,56 @@
+kind: Deployment
+apiVersion: extensions/v1beta1
+kind: Deployment
+apiVersion: extensions/v1beta1
+metadata:
+  name: heketi-deployment
+  labels:
+    app: heketi
+  annotations:
+    description: Defines how to deploy Heketi
+spec:
+  replicas: 1
+  template:
+    metadata:
+      name: heketi
+      labels:
+        app: heketi
+    spec:
+#      hostNetwork: true
+      containers:
+      - name: heketi
+        image: heketi/heketi:dev
+        imagePullPolicy: IfNotPresent
+        volumeMounts:
+        - name: keys
+          mountPath: /usr/share/heketi/keys
+        - name: config
+          mountPath: /etc/heketi  
+        - name: db
+          mountPath: /var/lib/heketi  
+          readOnly: false
+        livenessProbe:
+          httpGet:
+            path: /hello
+            port: 8080
+          initialDelaySeconds: 30
+          timeoutSeconds: 5
+        readinessProbe:
+          httpGet:
+            path: /hello
+            port: 8080
+          initialDelaySeconds: 30
+          timeoutSeconds: 5
+      volumes:
+        - name: keys
+          secret:
+            secretName: ssh-key-secret
+        - name: config
+          configMap:
+            name: heketi-config
+        - name: db
+          glusterfs:
+            endpoints: glusterfs-cluster
+            path: heketiDB
+           # path: vol_75c6abd0c1447fa4f96a5416350f8762
+

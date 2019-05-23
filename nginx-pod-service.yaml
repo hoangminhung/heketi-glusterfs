@@ -1,0 +1,12 @@
+kind: Service
+apiVersion: v1
+metadata:
+  name: gluster-pod1
+spec:
+  selector:
+    name: gluster-pod1
+  ports:
+  - protocol: TCP
+    port: 80
+    targetPort: 80
+  
